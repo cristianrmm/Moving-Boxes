@@ -1,3 +1,14 @@
+'''
+Developer: Cristian Moncada
+
+contributors:
+      Cristian Moncada
+
+Description: 2-demensional game where the user can develop and test out his/her map
+
+Files: map.txt
+'''
+
 import pygame
 from pygame.locals import *
 import sys
@@ -306,7 +317,66 @@ class Map():
                   return True
             else:
                   return False
+
+class AccessMemory(object):
+      def __init__(self):
+            self.var = 0
+            self.hor = 0
+            self.ballPosX = 0
+            self.ballPosY = 0
+            self.test = ""
+            
+      def OpenGame(self, testWorld):
+            getMap = open('map.txt', 'r')
+            self.ver = int(getMap.readline())
+            self.hor = int(getMap.readline())
+            self.ballPosX = int(getMap.readline())
+            self.ballPosY = int(getMap.readline())
                   
+            for getLand in getMap.read():
+                  if getLand != "," and getLand != "\n":
+                        self.test = self.test + getLand
+                  elif getLand != "\n":
+                        testWorld[len(testWorld) - 1].append(int(self.test))
+                        self.test = ""
+                  if getLand == "\n":
+                        testWorld.append([])
+
+            testWorld.remove(testWorld[len(testWorld) - 1])
+            
+            getMap.close()
+
+      def getVar(self):
+            return self.ver
+
+      def getHor(self):
+            return self.hor
+
+      def getballPosX(self):
+            return self.ballPosX
+
+      def getballPosY(self):
+            return self.ballPosY
+
+      def getTest(self):
+            return self.test
+            
+      def SaveGame(self, world, mapY, mapX, ballPosX, ballPosY):
+            saveMap = open('map.txt', 'w')
+            saveMap.write(str(mapY) + "\n")
+            saveMap.write(str(mapX) + "\n")
+            saveMap.write(str(ballPosX) + "\n")
+            saveMap.write(str(ballPosY) + "\n")
+            save1 = 0
+            save2 = 0
+            while save1 < len(world):
+                  while save2 < len(world[0]):
+                        saveMap.write(str(world[save1][save2]) + ",")
+                        save2 = save2 + 1
+                  save2 = 0
+                  saveMap.write("\n")
+                  save1 = save1 + 1
+            saveMap.close()
 
 
 def Main_Loop():
@@ -316,6 +386,7 @@ def Main_Loop():
       controlRoad = Controls(60, 60)
 
       option = Controls(300, 40)
+      accessMemory = AccessMemory()
       
       #items that is used to create the map
       mapCreater = Controls(60,60)
@@ -330,27 +401,17 @@ def Main_Loop():
 
       #reopens the saved file
       testWorld = [[]]
-      test = ""
-      getMap = open('map.txt', 'r')
-      ver = int(getMap.readline())
-      hor = int(getMap.readline())
-      ballPosX = int(getMap.readline())
-      ballPosY = int(getMap.readline())
+      #-----------------------------------------------------
+      accessMemory.OpenGame(testWorld)
+      ver = accessMemory.getVar()
+      hor = accessMemory.getHor()
+      ballPosX = accessMemory.getballPosX()
+      ballPosY = accessMemory.getballPosY()
+      test = accessMemory.getTest();
+      #--------------------------------------------------
       defaultX = hor
       defaultY = ver
       
-      for getLand in getMap.read():
-            if getLand != "," and getLand != "\n":
-                  test = test + getLand
-            elif getLand != "\n":
-                  testWorld[len(testWorld) - 1].append(int(test))
-                  test = ""
-            if getLand == "\n":
-                  testWorld.append([])
-
-      testWorld.remove(testWorld[len(testWorld) - 1])
-      
-      getMap.close()
       world = testWorld
       
       gameMap = Map()
@@ -401,22 +462,7 @@ def Main_Loop():
 
                   if event.type == KEYDOWN:
                         if event.key == K_0:
-                              saveMap = open('map.txt', 'w')
-                              saveMap.write(str(mapY) + "\n")
-                              saveMap.write(str(mapX) + "\n")
-                              saveMap.write(str(ballPosX) + "\n")
-                              saveMap.write(str(ballPosY) + "\n")
-                              save1 = 0
-                              save2 = 0
-                              while save1 < len(world):
-                                    while save2 < len(world[0]):
-                                          saveMap.write(str(world[save1][save2]) + ",")
-                                          save2 = save2 + 1
-                                    save2 = 0
-                                    saveMap.write("\n")
-                                    save1 = save1 + 1
-                              saveMap.close()
-                              
+                              accessMemory.SaveGame(world, mapY, mapX, ballPosX, ballPosY)                              
                               pygame.quit()
                               sys.exit()
 
@@ -508,22 +554,23 @@ def Main_Loop():
                               visible = True
 
                         #changes the color of the ball to red
-                        if visible == True and control.Touch(1150, 100, mouse_x, mouse_y):
-                              red = True
-                              blue = False
-                              green = False
+                        if visible == True:
+                              if control.Touch(1150, 100, mouse_x, mouse_y):
+                                    red = True
+                                    blue = False
+                                    green = False
 
-                        #chage the color fo the ball to blue
-                        if visible == True and control.Touch(1290, 100, mouse_x, mouse_y):
-                              red = False
-                              blue = True
-                              green = False
+                              #chage the color fo the ball to blue
+                              if control.Touch(1290, 100, mouse_x, mouse_y):
+                                    red = False
+                                    blue = True
+                                    green = False
 
-                        #change the color of the ball to green
-                        if visible == True and control.Touch(1430, 100, mouse_x, mouse_y):
-                              red = False
-                              blue = False
-                              green = True
+                              #change the color of the ball to green
+                              if control.Touch(1430, 100, mouse_x, mouse_y):
+                                    red = False
+                                    blue = False
+                                    green = True
 
                         #adds the land
                         if visible == True:
@@ -538,8 +585,7 @@ def Main_Loop():
                                     gameMap.addLand(world, 'y')
                                     locationY += 100
 
-                        #option list for the user to chose from
-                        if visible == True:
+                              #option list for the user to chose from
                               base = option.Touch(1150, 200, mouse_x, mouse_y)
                               if (base):
                                     if (1 not in options):
@@ -552,8 +598,7 @@ def Main_Loop():
                                     if (1 not in options):
                                           options[1] = 1
                                           choice = 1
-
-                        if visible == True:
+                                          
                               #change the tile on the grid
                               if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
                                     posx = math.floor((mouse_x - (50 * hor)) / 50) % 2
