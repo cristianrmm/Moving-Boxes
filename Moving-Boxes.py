@@ -228,6 +228,8 @@ class Map():
                               color = (0, 255, 0)
                         if road[y][x] == 2:
                               color = (184, 134, 11)
+                        if road[y][x] == 3:
+                              color = (255, 0, 0)
 
                         #position of the map
                         size = (x * 50 + dx * 50, y * 50 + dy * 50, 50, 50)
@@ -242,6 +244,9 @@ class Map():
             world[int(indexY - posy) + 1][int(indexX - posx)] = br
             world[int(indexY - posy)][int(indexX - posx) + 1] = tl
             world[int(indexY - posy) + 1][int(indexX - posx) + 1] = bl
+
+      def elementStructure(self, world, indexX, indexY, value):
+            world[int(indexY)][int(indexX)] = value
 
       #restricts the top and left bounds of the wall
       def changable(self, world, indexX, indexY, posx, posy, tileNumber):
@@ -346,21 +351,6 @@ class AccessMemory(object):
             
             getMap.close()
 
-      def getVar(self):
-            return self.ver
-
-      def getHor(self):
-            return self.hor
-
-      def getballPosX(self):
-            return self.ballPosX
-
-      def getballPosY(self):
-            return self.ballPosY
-
-      def getTest(self):
-            return self.test
-            
       def SaveGame(self, world, mapY, mapX, ballPosX, ballPosY):
             saveMap = open('map.txt', 'w')
             saveMap.write(str(mapY) + "\n")
@@ -379,6 +369,21 @@ class AccessMemory(object):
             saveMap.close()
 
 
+      def getVar(self):
+            return self.ver
+
+      def getHor(self):
+            return self.hor
+
+      def getballPosX(self):
+            return self.ballPosX
+
+      def getballPosY(self):
+            return self.ballPosY
+
+      def getTest(self):
+            return self.test
+            
 def Main_Loop():
       #calls the initial functions
       ball = Ball(75, 75, 25, 0, 0) #cordx, cordy, radius, speedx, speedy
@@ -395,20 +400,19 @@ def Main_Loop():
       choice = len(options)
       
       world = [[1, 1, -1, -1],
-               [1, 2, -1, -1],
+                [1, 2, -1, -1],
                [-1, -1, -1, -1],
                [-1, -1, -1, -1]]
 
       #reopens the saved file
       testWorld = [[]]
-      #-----------------------------------------------------
       accessMemory.OpenGame(testWorld)
       ver = accessMemory.getVar()
       hor = accessMemory.getHor()
       ballPosX = accessMemory.getballPosX()
       ballPosY = accessMemory.getballPosY()
       test = accessMemory.getTest();
-      #--------------------------------------------------
+      
       defaultX = hor
       defaultY = ver
       
@@ -555,25 +559,21 @@ def Main_Loop():
 
                         #changes the color of the ball to red
                         if visible == True:
+                              red = False
+                              blue = False
+                              green = False
+                              #change the color of the ball to red
                               if control.Touch(1150, 100, mouse_x, mouse_y):
                                     red = True
-                                    blue = False
-                                    green = False
 
-                              #chage the color fo the ball to blue
+                              #chage the color of the ball to blue
                               if control.Touch(1290, 100, mouse_x, mouse_y):
-                                    red = False
                                     blue = True
-                                    green = False
 
                               #change the color of the ball to green
                               if control.Touch(1430, 100, mouse_x, mouse_y):
-                                    red = False
-                                    blue = False
                                     green = True
 
-                        #adds the land
-                        if visible == True:
                               #adds land based on the location where the map is and where the user touch the screen
                               x_axis = land.Touch((len(world[0])) * 50 - 100 + (50 * hor), len(world) + 50 * ver, mouse_x, mouse_y)
                               y_axis = land2.Touch((len(world[0])) + 50 * hor, (len(world)) * 50 - 100 + 50 * ver, mouse_x, mouse_y)
@@ -598,6 +598,14 @@ def Main_Loop():
                                     if (1 not in options):
                                           options[1] = 1
                                           choice = 1
+
+                              if (options[1] == 1):
+                                    if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
+                                          sectionX = math.ceil((mouse_x - (50 * hor))/ 50)
+                                          sectionY = math.ceil((mouse_y - (50 * ver))/ 50)
+                                          if (world[int(sectionY)][int(sectionX)] == 2):
+                                                gameMap.elementStructure(world, sectionX, sectionY, 3)
+                                        
                                           
                               #change the tile on the grid
                               if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
@@ -658,7 +666,7 @@ def Main_Loop():
                   screen.blit(labelOpen, (1000, 0))
 
             
-            #the menu is closed
+            #the menu is closed and nonInterctive
             elif visible == False:
                   ball.default()
                   screen.blit(labelClose, (1500, 0))
