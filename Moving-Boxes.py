@@ -391,12 +391,14 @@ def Main_Loop():
       controlRoad = Controls(60, 60)
 
       option = Controls(300, 40)
+      landChoice = 0;
       accessMemory = AccessMemory()
       
       #items that is used to create the map
       mapCreater = Controls(60,60)
 
       options = [0, 0]
+      landOptions = [False, False]
       choice = len(options)
       
       world = [[1, 1, -1, -1],
@@ -600,11 +602,27 @@ def Main_Loop():
                                           choice = 1
 
                               if (options[1] == 1):
-                                    if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
-                                          sectionX = math.ceil((mouse_x - (50 * hor))/ 50)
-                                          sectionY = math.ceil((mouse_y - (50 * ver))/ 50)
-                                          if (world[int(sectionY)][int(sectionX)] == 2):
+                                    if (controlRoad.Touch(1150, 275, mouse_x, mouse_y)):
+                                          landOptions[0] = True
+                                          change = True
+
+                                    if (controlRoad.Touch(1240, 275, mouse_x, mouse_y)):
+                                          landOptions[1] = True
+                                          change = True
+                                          
+                                          
+                              if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver) and change:
+                                    sectionX = math.ceil((mouse_x - (50 * hor))/ 50)
+                                    sectionY = math.ceil((mouse_y - (50 * ver))/ 50)
+                                    if (world[int(sectionY)][int(sectionX)] == 2):
+                                          if (landOptions[0]):
                                                 gameMap.elementStructure(world, sectionX, sectionY, 3)
+                                                change = False
+                                                landOptions[0] = False
+                                          if (landOptions[1]):
+                                                gameMap.elementStructure(world, sectionX, sectionY, 1)
+                                                change = False
+                                                landOptions[1] = False
                                         
                                           
                               #change the tile on the grid
@@ -659,6 +677,7 @@ def Main_Loop():
                   elif (options[1] == 1):
                         option.ButtonText(1150, 200, "items")
                         option.Button(1150, 275, 60, 60, 255, 0, 0)
+                        option.Button(1240, 275, 60, 60, 0, 255, 0)
                   else:
                         option.ButtonText(1150, 200, "add land")
                         option.ButtonText(1150, 275, "items")
