@@ -222,13 +222,13 @@ class Map():
                   while y < len(road):
                         if road[y][x] == -1:
                               color = (255, 255, 255)
-                        if road[y][x] == 0:
+                        elif road[y][x] == 0:
                               color = (0, 0, 255)
-                        if road[y][x] == 1:
+                        elif road[y][x] == 1:
                               color = (0, 255, 0)
-                        if road[y][x] == 2:
+                        elif road[y][x] == 2:
                               color = (184, 134, 11)
-                        if road[y][x] == 3:
+                        elif road[y][x] == 3:
                               color = (255, 0, 0)
 
                         #position of the map
@@ -398,7 +398,7 @@ def Main_Loop():
       mapCreater = Controls(60,60)
 
       options = [0, 0]
-      landOptions = [False, False]
+      landOptions = [False, False, False]
       choice = len(options)
       
       world = [[1, 1, -1, -1],
@@ -431,6 +431,7 @@ def Main_Loop():
       red = True
       green = False
       blue = False
+      elementNumber = 0
       
       holdUp = False
       holdDown = False
@@ -580,10 +581,10 @@ def Main_Loop():
                               x_axis = land.Touch((len(world[0])) * 50 - 100 + (50 * hor), len(world) + 50 * ver, mouse_x, mouse_y)
                               y_axis = land2.Touch((len(world[0])) + 50 * hor, (len(world)) * 50 - 100 + 50 * ver, mouse_x, mouse_y)
                               
-                              if x_axis and mouse_x < 1100 and change:
+                              if x_axis and mouse_x < 1100 and change and options[0] == 1:
                                     gameMap.addLand(world, 'x')
                                     locationX += 100
-                              if y_axis and mouse_x < 1100 and change:
+                              if y_axis and mouse_x < 1100 and change and options[0] == 1:
                                     gameMap.addLand(world, 'y')
                                     locationY += 100
 
@@ -599,30 +600,7 @@ def Main_Loop():
                               if (option.Touch(1150, 275, mouse_x, mouse_y)):
                                     if (1 not in options):
                                           options[1] = 1
-                                          choice = 1
-
-                              if (options[1] == 1):
-                                    if (controlRoad.Touch(1150, 275, mouse_x, mouse_y)):
-                                          landOptions[0] = True
-                                          change = True
-
-                                    if (controlRoad.Touch(1240, 275, mouse_x, mouse_y)):
-                                          landOptions[1] = True
-                                          change = True
-                                          
-                                          
-                              if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver) and change:
-                                    sectionX = math.ceil((mouse_x - (50 * hor))/ 50)
-                                    sectionY = math.ceil((mouse_y - (50 * ver))/ 50)
-                                    if (world[int(sectionY)][int(sectionX)] == 2):
-                                          if (landOptions[0]):
-                                                gameMap.elementStructure(world, sectionX, sectionY, 3)
-                                                change = False
-                                                landOptions[0] = False
-                                          if (landOptions[1]):
-                                                gameMap.elementStructure(world, sectionX, sectionY, 1)
-                                                change = False
-                                                landOptions[1] = False
+                                          choice = 1       
                                         
                                           
                               #change the tile on the grid
@@ -632,10 +610,24 @@ def Main_Loop():
                                     sectionX = math.ceil((mouse_x - (50 * hor))/ 50)
                                     sectionY = math.ceil((mouse_y - (50 * ver))/ 50)
                                     
-                                    #changes the tiles
-                                    if change and sectionX >= 0 and sectionY >= 0:
-                                          gameMap.changable(world, sectionX, sectionY, posx, posy, tileNumber)
-                                          change = False
+                                    #changes the tiles based on the category that he user has chosen
+                                    if change and sectionX >= 0 and sectionY >= 0 and mouse_x < 1100:
+                                          if options[1] == 1 and landOptions[elementNumber] and world[int(sectionY)][int(sectionX)] != -1:
+                                                if (landOptions[0]):
+                                                      gameMap.elementStructure(world, sectionX, sectionY, 3)
+                                                      landOptions[0] = False
+                                                      change = False
+                                                elif (landOptions[1]):
+                                                      gameMap.elementStructure(world, sectionX, sectionY, 1)
+                                                      landOptions[1] = False
+                                                      change = False
+                                                elif (landOptions[2]):
+                                                      gameMap.elementStructure(world, sectionX, sectionY, 2)
+                                                      landOptions[2] = False
+                                                      change = False
+                                          elif options[0] == 1:
+                                                gameMap.changable(world, sectionX, sectionY, posx, posy, tileNumber)
+                                                change = False
                                     
                               else:
                                     sectionX = 0
@@ -676,8 +668,28 @@ def Main_Loop():
                         tileNumber = num[0]
                   elif (options[1] == 1):
                         option.ButtonText(1150, 200, "items")
+
+                        if (controlRoad.Touch(1150, 275, mouse_x, mouse_y)):
+                              landOptions[elementNumber] = False
+                              landOptions[0] = True
+                              elementNumber = 0;
+                              change = True
+
+                        if (controlRoad.Touch(1240, 275, mouse_x, mouse_y)):
+                              landOptions[elementNumber] = False
+                              landOptions[1] = True
+                              elementNumber = 1
+                              change = True
+
+                        if (controlRoad.Touch(1330, 275, mouse_x, mouse_y)):
+                              landOptions[elementNumber] = False
+                              landOptions[2] = True
+                              elementNumber = 2
+                              change = True
+                              
                         option.Button(1150, 275, 60, 60, 255, 0, 0)
                         option.Button(1240, 275, 60, 60, 0, 255, 0)
+                        option.Button(1330, 275, 60, 60, 184, 134, 11)
                   else:
                         option.ButtonText(1150, 200, "add land")
                         option.ButtonText(1150, 275, "items")
@@ -690,6 +702,7 @@ def Main_Loop():
                   ball.default()
                   screen.blit(labelClose, (1500, 0))
                   gameMap.myWorld(world, hor, ver)
+                  change = False
                   if holdUp == True or holdDown == True or holdRight == True or holdLeft == True:
                         delay = delay + 1
 
