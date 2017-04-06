@@ -318,10 +318,12 @@ class Map():
 
       #rstricts the movement of the ball when it is horizontal or vertically centered
       def wall(self, world, posX, posY):
+            if (world[posY][posX] == 3):
+                  return 2
             if (world[posY][posX] == 2):
-                  return True
+                  return 1
             else:
-                  return False
+                  return 0
 
 class AccessMemory(object):
       def __init__(self):
@@ -465,38 +467,73 @@ def Main_Loop():
             
             
             for event in pygame.event.get():
-                 
-
                   if event.type == KEYDOWN:
                         if event.key == K_0:
                               accessMemory.SaveGame(world, mapY, mapX, ballPosX, ballPosY)                              
                               pygame.quit()
                               sys.exit()
 
+                        #moves the map up down left and right
                         if visible == False:
                               if event.key == K_UP:
-                                    if (gameMap.wall(world, ballPosX, ballPosY - 1)):
+                                    if (gameMap.wall(world, ballPosX, ballPosY - 1) == 2):
+                                          if (gameMap.wall(world, ballPosX, ballPosY - 2) == 1):
+                                                world[ballPosY - 1][ballPosX] = 2
+                                                world[ballPosY - 2][ballPosX] = 3
+                                                ballPosY = ballPosY - 1
+                                                ver = ver + 1
+                                                mapY = ver
+                                                holdUp = True
+                                                
+                                    elif (gameMap.wall(world, ballPosX, ballPosY - 1) == 1):
                                           ballPosY = ballPosY - 1
                                           ver = ver + 1
                                           mapY = ver
                                           holdUp = True
 
                               elif event.key == K_DOWN:
-                                    if (gameMap.wall(world, ballPosX, ballPosY + 1)):
+                                    if (gameMap.wall(world, ballPosX, ballPosY + 1) == 2):
+                                          if (gameMap.wall(world, ballPosX, ballPosY + 2) == 1):
+                                                world[ballPosY + 1][ballPosX] = 2
+                                                world[ballPosY + 2][ballPosX] = 3
+                                                ballPosY = ballPosY + 1
+                                                ver = ver - 1
+                                                mapY = ver
+                                                holdUp = True
+                                                
+                                    elif (gameMap.wall(world, ballPosX, ballPosY + 1) == 1):
                                           ballPosY = ballPosY + 1
                                           ver = ver - 1
                                           mapY = ver
                                           holdDown = True
 
                               elif event.key == K_RIGHT:
-                                    if (gameMap.wall(world, ballPosX + 1, ballPosY)):
+                                    if (gameMap.wall(world, ballPosX + 1, ballPosY) == 2):
+                                          if (gameMap.wall(world, ballPosX + 2, ballPosY) == 1):
+                                                world[ballPosY][ballPosX + 1] = 2
+                                                world[ballPosY][ballPosX + 2] = 3
+                                                ballPosX = ballPosX + 1
+                                                hor = hor - 1
+                                                mapX = hor
+                                                holdUp = True
+                                                
+                                    elif (gameMap.wall(world, ballPosX + 1, ballPosY) == 1):
                                           ballPosX = ballPosX + 1
                                           hor = hor - 1
                                           mapX = hor
                                           holdRight = True
 
                               elif event.key ==K_LEFT:
-                                    if (gameMap.wall(world, ballPosX - 1, ballPosY)):
+                                    if (gameMap.wall(world, ballPosX - 1, ballPosY) == 2):
+                                          if (gameMap.wall(world, ballPosX - 2, ballPosY) == 1):
+                                                world[ballPosY][ballPosX - 1] = 2
+                                                world[ballPosY][ballPosX - 2] = 3
+                                                ballPosX = ballPosX - 1
+                                                hor = hor + 1
+                                                mapX = hor
+                                                holdUp = True
+                                                
+                                    elif (gameMap.wall(world, ballPosX - 1, ballPosY)  == 1):
                                           ballPosX = ballPosX - 1
                                           hor = hor + 1
                                           mapX = hor
@@ -600,8 +637,7 @@ def Main_Loop():
                               if (option.Touch(1150, 275, mouse_x, mouse_y)):
                                     if (1 not in options):
                                           options[1] = 1
-                                          choice = 1       
-                                        
+                                          choice = 1                                        
                                           
                               #change the tile on the grid
                               if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
@@ -631,8 +667,7 @@ def Main_Loop():
                                     
                               else:
                                     sectionX = 0
-                                    sectionY = 0
-                            
+                                    sectionY = 0                
             
             #the menu is open and it frezzes the game
             if visible == True:
@@ -707,28 +742,28 @@ def Main_Loop():
                         delay = delay + 1
 
                   if holdUp == True:
-                        if (gameMap.wall(world, ballPosX, ballPosY - 1)): 
+                        if (gameMap.wall(world, ballPosX, ballPosY - 1) == 0): 
                               if delay % 75 == 0:
                                     ballPosY = ballPosY - 1
                                     ver = ver + 1
                                     mapY = ver
                                     
                   elif holdDown == True:
-                        if (gameMap.wall(world, ballPosX, ballPosY + 1)):
+                        if (gameMap.wall(world, ballPosX, ballPosY + 1) == 0):
                               if delay % 75 == 0:
                                     ballPosY = ballPosY + 1
                                     ver = ver - 1
                                     mapY = ver
 
                   elif holdRight == True:
-                        if (gameMap.wall(world, ballPosX + 1, ballPosY)):
+                        if (gameMap.wall(world, ballPosX + 1, ballPosY) == 0):
                               if delay % 75 == 0:
                                     ballPosX = ballPosX + 1
                                     hor = hor - 1
                                     mapX = hor
 
                   elif holdLeft == True:
-                        if (gameMap.wall(world, ballPosX - 1, ballPosY)):
+                        if (gameMap.wall(world, ballPosX - 1, ballPosY) == 0):
                               if delay % 75 == 0:
                                     ballPosX = ballPosX - 1
                                     hor = hor + 1
