@@ -216,6 +216,7 @@ class Map():
             size = (y , x, 50, 50)
             color = (0, 0, 0)
             index = 0
+            outline = False
 
       
             while x < len(road[0]):
@@ -230,10 +231,15 @@ class Map():
                               color = (184, 134, 11)
                         elif road[y][x] == 3:
                               color = (255, 0, 0)
+                              outline = True
 
                         #position of the map
                         size = (x * 50 + dx * 50, y * 50 + dy * 50, 50, 50)
-                        pygame.draw.rect(screen, color, size)
+                        if (outline):
+                              pygame.draw.rect(screen, color, size)
+                              outline = False
+                        else: 
+                              pygame.draw.rect(screen, color, size)
                         
                         y = y + 1
                   y = 0
@@ -334,12 +340,14 @@ class AccessMemory(object):
             self.test = ""
             
       def OpenGame(self, testWorld):
-            getMap = open('map.txt', 'r')
-            self.ver = int(getMap.readline())
-            self.hor = int(getMap.readline())
-            self.ballPosX = int(getMap.readline())
-            self.ballPosY = int(getMap.readline())
-                  
+            getPlayer = open('player.txt', 'r')
+            self.ver = int(getPlayer.readline())
+            self.hor = int(getPlayer.readline())
+            self.ballPosX = int(getPlayer.readline())
+            self.ballPosY = int(getPlayer.readline())
+            getPlayer.close()
+
+            getMap = open('World/map.txt', 'r')
             for getLand in getMap.read():
                   if getLand != "," and getLand != "\n":
                         self.test = self.test + getLand
@@ -354,11 +362,14 @@ class AccessMemory(object):
             getMap.close()
 
       def SaveGame(self, world, mapY, mapX, ballPosX, ballPosY):
-            saveMap = open('map.txt', 'w')
-            saveMap.write(str(mapY) + "\n")
-            saveMap.write(str(mapX) + "\n")
-            saveMap.write(str(ballPosX) + "\n")
-            saveMap.write(str(ballPosY) + "\n")
+            savePlayer = open('player.txt', 'w')
+            savePlayer.write(str(mapY) + "\n")
+            savePlayer.write(str(mapX) + "\n")
+            savePlayer.write(str(ballPosX) + "\n")
+            savePlayer.write(str(ballPosY) + "\n")
+            savePlayer.close()
+            
+            saveMap = open('World/map.txt', 'w')
             save1 = 0
             save2 = 0
             while save1 < len(world):
@@ -404,7 +415,7 @@ def Main_Loop():
       choice = len(options)
       
       world = [[1, 1, -1, -1],
-                [1, 2, -1, -1],
+               [1, 2, -1, -1],
                [-1, -1, -1, -1],
                [-1, -1, -1, -1]]
 
@@ -467,6 +478,8 @@ def Main_Loop():
             
             
             for event in pygame.event.get():
+                 
+
                   if event.type == KEYDOWN:
                         if event.key == K_0:
                               accessMemory.SaveGame(world, mapY, mapX, ballPosX, ballPosY)                              
@@ -499,7 +512,7 @@ def Main_Loop():
                                                 ballPosY = ballPosY + 1
                                                 ver = ver - 1
                                                 mapY = ver
-                                                holdUp = True
+                                                holdDown = True
                                                 
                                     elif (gameMap.wall(world, ballPosX, ballPosY + 1) == 1):
                                           ballPosY = ballPosY + 1
@@ -515,7 +528,7 @@ def Main_Loop():
                                                 ballPosX = ballPosX + 1
                                                 hor = hor - 1
                                                 mapX = hor
-                                                holdUp = True
+                                                holdRight = True
                                                 
                                     elif (gameMap.wall(world, ballPosX + 1, ballPosY) == 1):
                                           ballPosX = ballPosX + 1
@@ -531,7 +544,7 @@ def Main_Loop():
                                                 ballPosX = ballPosX - 1
                                                 hor = hor + 1
                                                 mapX = hor
-                                                holdUp = True
+                                                holdLeft = True
                                                 
                                     elif (gameMap.wall(world, ballPosX - 1, ballPosY)  == 1):
                                           ballPosX = ballPosX - 1
@@ -637,7 +650,8 @@ def Main_Loop():
                               if (option.Touch(1150, 275, mouse_x, mouse_y)):
                                     if (1 not in options):
                                           options[1] = 1
-                                          choice = 1                                        
+                                          choice = 1       
+                                        
                                           
                               #change the tile on the grid
                               if mouse_x < (locationX + 50 * hor) and mouse_y < (locationY + 50 * ver):
@@ -667,7 +681,8 @@ def Main_Loop():
                                     
                               else:
                                     sectionX = 0
-                                    sectionY = 0                
+                                    sectionY = 0
+                            
             
             #the menu is open and it frezzes the game
             if visible == True:
@@ -742,39 +757,71 @@ def Main_Loop():
                         delay = delay + 1
 
                   if holdUp == True:
-                        if (gameMap.wall(world, ballPosX, ballPosY - 1) == 0): 
+                        if (gameMap.wall(world, ballPosX, ballPosY - 1) == 2):
+                              if (gameMap.wall(world, ballPosX, ballPosY - 2) == 1):
+                                    if delay % 75 == 0:
+                                          world[ballPosY - 1][ballPosX] = 2
+                                          world[ballPosY - 2][ballPosX] = 3
+                                          ballPosY = ballPosY - 1
+                                          ver = ver + 1
+                                          mapY = ver
+                        
+                        elif (gameMap.wall(world, ballPosX, ballPosY - 1) == 1): 
                               if delay % 75 == 0:
                                     ballPosY = ballPosY - 1
                                     ver = ver + 1
                                     mapY = ver
                                     
                   elif holdDown == True:
-                        if (gameMap.wall(world, ballPosX, ballPosY + 1) == 0):
+                        if (gameMap.wall(world, ballPosX, ballPosY + 1) == 2):
+                              if (gameMap.wall(world, ballPosX, ballPosY + 2) == 1):
+                                    if delay % 75 == 0:
+                                          world[ballPosY + 1][ballPosX] = 2
+                                          world[ballPosY + 2][ballPosX] = 3
+                                          ballPosY = ballPosY + 1
+                                          ver = ver - 1
+                                          mapY = ver
+                                    
+                        elif (gameMap.wall(world, ballPosX, ballPosY + 1) == 1):
                               if delay % 75 == 0:
                                     ballPosY = ballPosY + 1
                                     ver = ver - 1
                                     mapY = ver
 
                   elif holdRight == True:
-                        if (gameMap.wall(world, ballPosX + 1, ballPosY) == 0):
+                        if (gameMap.wall(world, ballPosX + 1, ballPosY) == 2):
+                              if (gameMap.wall(world, ballPosX + 2, ballPosY) == 1):
+                                    if delay % 75 == 0:
+                                          world[ballPosY][ballPosX + 1] = 2
+                                          world[ballPosY][ballPosX + 2] = 3
+                                          ballPosX = ballPosX + 1
+                                          hor = hor - 1
+                                          mapX = hor
+                                    
+                        elif (gameMap.wall(world, ballPosX + 1, ballPosY) == 1):
                               if delay % 75 == 0:
                                     ballPosX = ballPosX + 1
                                     hor = hor - 1
                                     mapX = hor
 
                   elif holdLeft == True:
-                        if (gameMap.wall(world, ballPosX - 1, ballPosY) == 0):
+                        if (gameMap.wall(world, ballPosX - 1, ballPosY) == 2):
+                              if (gameMap.wall(world, ballPosX - 2, ballPosY) == 1):
+                                    if delay % 75 == 0:
+                                          world[ballPosY][ballPosX - 1] = 2
+                                          world[ballPosY][ballPosX - 2] = 3
+                                          ballPosX = ballPosX - 1
+                                          hor = hor + 1
+                                          mapX = hor
+                        
+                        elif (gameMap.wall(world, ballPosX - 1, ballPosY)):
                               if delay % 75 == 0:
                                     ballPosX = ballPosX - 1
                                     hor = hor + 1
                                     mapX = hor
-
                                     
                   ball.drawBall()
                   ball.moveBall()
-
-            
-
                   
             pygame.display.update()
 
