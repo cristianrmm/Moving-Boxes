@@ -13,6 +13,7 @@ import pygame
 from pygame.locals import *
 import sys
 import math
+from My_Input import textInput;
 
 BLACK = (0, 0, 0)
 
@@ -358,7 +359,6 @@ class AccessMemory(object):
                         testWorld.append([])
 
             testWorld.remove(testWorld[len(testWorld) - 1])
-            
             getMap.close()
 
       def SaveGame(self, world, mapY, mapX, ballPosX, ballPosY):
@@ -402,6 +402,8 @@ def Main_Loop():
       ball = Ball(75, 75, 25, 0, 0) #cordx, cordy, radius, speedx, speedy
       control = Controls(110, 40)
       controlRoad = Controls(60, 60)
+      information = textInput(screen)
+      word = ""
 
       option = Controls(300, 40)
       landChoice = 0;
@@ -436,8 +438,8 @@ def Main_Loop():
       gameMap = Map()
       text = pygame.font.SysFont("monospace", 75)
       
-      labelClose = text.render("<-", 1, (255, 255, 255))
-      labelOpen = text.render("->", 1, (255, 255, 255))
+      labelClose = text.render("<-", 1, (200, 200, 200))
+      labelOpen = text.render("->", 1, (200, 200, 200))
 
       change = False
       visible = False
@@ -479,12 +481,14 @@ def Main_Loop():
             
             for event in pygame.event.get():
                  
-
                   if event.type == KEYDOWN:
                         if event.key == K_0:
                               accessMemory.SaveGame(world, mapY, mapX, ballPosX, ballPosY)                              
                               pygame.quit()
                               sys.exit()
+
+                        if visible == True:
+                              word = information.Input(event.key, word)
 
                         #moves the map up down left and right
                         if visible == False:
@@ -599,7 +603,6 @@ def Main_Loop():
                   if event.type == MOUSEBUTTONDOWN:
                         mouse_x, mouse_y = event.pos
 
-
                         #closes the panel
                         if visible == True and mouse_x > 990 and mouse_x < 1100 and mouse_y < 75:
                               hor = mapX
@@ -612,6 +615,7 @@ def Main_Loop():
 
                         #changes the color of the ball to red
                         if visible == True:
+                              
                               red = False
                               blue = False
                               green = False
@@ -682,14 +686,19 @@ def Main_Loop():
                               else:
                                     sectionX = 0
                                     sectionY = 0
+
+                              
+                                   
                             
             
             #the menu is open and it frezzes the game
             if visible == True:
+
                   #the game is frozen
                   gameMap.myWorld(world, hor, ver)
                   ball.drawBall()
                   ball.stationaryBall()
+                  word = information.Input(False, word)
 
                   #the menu
                   color = (125, 125, 125)
@@ -750,8 +759,8 @@ def Main_Loop():
             #the menu is closed and nonInterctive
             elif visible == False:
                   ball.default()
-                  screen.blit(labelClose, (1500, 0))
                   gameMap.myWorld(world, hor, ver)
+                  screen.blit(labelClose, (1500, 0))
                   change = False
                   if holdUp == True or holdDown == True or holdRight == True or holdLeft == True:
                         delay = delay + 1
